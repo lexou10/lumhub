@@ -1,0 +1,35 @@
+[Unit]
+Description=LumHub Server
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=lumhub
+Group=lumhub
+WorkingDirectory=/opt/lumhub
+ExecStart=/usr/bin/node /opt/lumhub/dist/index.js
+Restart=always
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=5
+
+# Variables d'environnement
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=DB_PATH=/var/lib/lumhub/lumhub.db
+EnvironmentFile=-/etc/lumhub/lumhub.env
+
+# Sécurité
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/lumhub /var/log/lumhub
+
+# Logs
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=lumhub
+
+[Install]
+WantedBy=multi-user.target

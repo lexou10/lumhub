@@ -1,0 +1,57 @@
+{
+  "id": "legrand-064882",
+  "manufacturer": "Legrand",
+  "model": "064882",
+  "name": "Sortie de câble chauffage fil pilote",
+  "category": "heating",
+  "icon": "heater",
+  "color": "#FF6B35",
+  "capabilities": {
+    "pilot_wire_mode": {
+      "type": "enum",
+      "label": "Mode fil pilote",
+      "values": [
+        { "key": "comfort",      "label": "Confort",      "icon": "sun.max" },
+        { "key": "comfort_-1",   "label": "Confort -1°C", "icon": "sun.min" },
+        { "key": "comfort_-2",   "label": "Confort -2°C", "icon": "sun.min" },
+        { "key": "eco",          "label": "Éco",          "icon": "leaf" },
+        { "key": "frost_protection", "label": "Hors gel", "icon": "snowflake" },
+        { "key": "off",          "label": "Arrêt",        "icon": "power" }
+      ],
+      "default": "eco",
+      "readonly": false
+    },
+    "power_consumption": {
+      "type": "float",
+      "label": "Consommation",
+      "unit": "W",
+      "readonly": true,
+      "show_in_ui": true,
+      "history": true
+    },
+    "child_lock": {
+      "type": "boolean",
+      "label": "Verrouillage enfant",
+      "default": false,
+      "readonly": false
+    },
+    "led_indication": {
+      "type": "boolean",
+      "label": "Indicateur LED",
+      "default": true,
+      "readonly": false
+    }
+  },
+  "ui": {
+    "primary_control": "pilot_wire_mode",
+    "show_consumption": true,
+    "thermostat_compatible": true,
+    "card_style": "heating"
+  },
+  "zigbee": {
+    "clusters": {
+      "input": ["0x0000", "0x0003", "0x0201", "0xFF00"],
+      "output": ["0x0019"]
+    }
+  }
+}

@@ -1,0 +1,1 @@
+export { profilesRouter } from './settings'
