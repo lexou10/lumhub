@@ -34,7 +34,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     // Vérifier que la session existe en BDD (permet la révocation)
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
     const session = getDb()
-      .prepare('SELECT id FROM sessions WHERE token_hash = ? AND expires_at > datetime("now")')
+      .prepare(`SELECT id FROM sessions WHERE token_hash = ? AND expires_at > datetime('now')`)
       .get(tokenHash)
 
     if (!session) {

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import { exec } from 'child_process'
+import { exec, spawn } from 'child_process'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -42,13 +42,7 @@ router.get('/status', (req: Request, res: Response) => {
 // ─── POST /api/v1/update/check ──────────────────────────────
 // Force une vérification GitHub (ou retourne le cache si < 1h)
 router.post('/check', (req: Request, res: Response) => {
-  const cache = readJSON(CHECK_CACHE)
-  if (cache?.checked_at) {
-    const age = Date.now() - new Date(cache.checked_at).getTime()
-    if (age < CACHE_TTL_MS) {
-      return res.json({ ...cache, from_cache: true })
-    }
-  }
+  // Pas de cache sur POST /check — toujours vérifier GitHub
 
   exec(`sudo ${UPDATER} check`, { timeout: 15000 }, (err, stdout, stderr) => {
     const result = readJSON(CHECK_CACHE)
@@ -73,14 +67,11 @@ router.post('/apply', (req: Request, res: Response) => {
   // Supprimer l'ancien résultat
   try { fs.unlinkSync(RESULT_FILE) } catch {}
 
-  // Lancer en arrière-plan
-  const child = exec(
-    `sudo ${UPDATER} apply`,
-    { timeout: 300000 },  // 5 min max
-    (err, stdout, stderr) => {
-      updateInProgress = false
-    }
-  )
+  // Lancer via launcher détaché
+  spawn('sudo', ['/usr/local/bin/lumhub-update-launcher.sh'], {
+    detached: true,
+    stdio: 'ignore'
+  }).unref()
 
   // Répondre immédiatement — le client poll /update/progress
   res.json({ started: true, message: 'Mise à jour en cours...' })

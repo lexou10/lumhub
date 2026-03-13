@@ -10,6 +10,7 @@ import { scenesRouter }      from './routes/scenes'
 import { automationsRouter } from './routes/automations'
 import { settingsRouter }    from './routes/settings'
 import { profilesRouter }    from './routes/profiles'
+import { thermostatsRouter } from './routes/thermostats'
 
 export const router = Router()
 
@@ -24,6 +25,7 @@ router.use('/devices',     devicesRouter)
 router.use('/scenes',      scenesRouter)
 router.use('/automations', automationsRouter)
 router.use('/profiles',    profilesRouter)
+router.use('/thermostats', thermostatsRouter)
 
 // Owner uniquement
 router.use('/settings', ownerOnly, settingsRouter)

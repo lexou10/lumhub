@@ -31,6 +31,27 @@ settingsRouter.patch('/', (req: Request, res: Response) => {
   res.json({ success: true })
 })
 
+
+// POST /api/v1/settings/restart
+settingsRouter.post('/restart', (_req: Request, res: Response) => {
+  res.json({ success: true, message: 'Redémarrage du serveur...' })
+  setTimeout(() => {
+    const net = require('net')
+    const sock = net.createConnection('/run/lumhub-leds.sock')
+    sock.on('connect', () => { sock.write('warning'); sock.end() })
+    sock.on('error', () => {})
+    setTimeout(() => process.kill(process.pid, 'SIGTERM'), 300)
+  }, 500)
+})
+
+// POST /api/v1/settings/reboot
+settingsRouter.post('/reboot', (_req: Request, res: Response) => {
+  res.json({ success: true, message: 'Redémarrage de la box...' })
+  setTimeout(() => {
+    require('child_process').exec('sudo reboot')
+  }, 500)
+})
+
 // ——————————————————————————————————————
 
 export const profilesRouter = Router()

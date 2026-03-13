@@ -3,7 +3,7 @@ import { getDb } from '../../database'
 import { findProfile, getProfile } from '../../services/deviceProfiles'
 import { ownerOrUser } from '../middleware/auth'
 import { broadcastDeviceState } from '../../websocket'
-import { sendCommand } from '../../services/zigbee'
+const { sendCommand, startPairing, stopPairing } = require('../../services/zigbee')
 
 export const devicesRouter = Router()
 
@@ -196,13 +196,13 @@ devicesRouter.get('/:id/history', (req: Request, res: Response) => {
 devicesRouter.post('/pairing/start', (req: Request, res: Response) => {
   if (req.user?.role !== 'owner') { res.status(403).json({ error: 'Owner requis' }); return }
   const { duration = 120 } = req.body
-  import('../../services/zigbee').then(({ startPairing }) => startPairing(duration))
+  Promise.resolve().then(() => startPairing(duration))
   res.json({ success: true, duration })
 })
 
 // POST /api/v1/devices/pairing/stop
 devicesRouter.post('/pairing/stop', (req: Request, res: Response) => {
   if (req.user?.role !== 'owner') { res.status(403).json({ error: 'Owner requis' }); return }
-  import('../../services/zigbee').then(({ stopPairing }) => stopPairing())
+  Promise.resolve().then(() => stopPairing())
   res.json({ success: true })
 })

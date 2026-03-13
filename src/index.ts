@@ -62,6 +62,16 @@ async function start() {
     httpServer.close(() => { closeDb(); process.exit(0) })
   }
 
+  // Signal LED : serveur prêt
+  httpServer.on('listening', () => {
+    setTimeout(() => {
+      const net = require('net')
+      const sock = net.createConnection('/run/lumhub-leds.sock')
+      sock.on('connect', () => { sock.write('ok'); sock.end() })
+      sock.on('error', () => {}) // ignorer si leds pas dispo
+    }, 1000)
+  })
+
   process.on('SIGTERM', shutdown)
   process.on('SIGINT', shutdown)
   process.on('uncaughtException', (err) => console.error('[Server] Erreur non gérée:', err))

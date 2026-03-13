@@ -1,0 +1,5 @@
+{
+  "version": "1.1.0",
+  "releaseDate": "2026-03-13",
+  "changelog": "- Fix ON/OFF Homebridge (casse majuscules)\n- Ajout routes API thermostats\n- Synchronisation états chauffages Homebridge\n- Thermostat réactif (cycle 10s + trigger immédiat)\n- Logique chauffe : temp < consigne = ON, temp >= consigne = OFF"
+}
