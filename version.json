@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.2.1",
   "releaseDate": "2026-03-17",
-  "changelog": "- Service automatisations (time, sunrise/sunset, device, manuel)\n- Conditions (plage horaire, température, état device)\n- Fix thermostat virtuel dans les automatisations\n- Trigger immédiat sur changement d'état device"
+  "changelog":  "Ajout de l’a configuration Homekit"
 }

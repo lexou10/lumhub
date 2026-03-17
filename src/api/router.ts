@@ -11,6 +11,7 @@ import { automationsRouter } from './routes/automations'
 import { settingsRouter }    from './routes/settings'
 import { profilesRouter }    from './routes/profiles'
 import { thermostatsRouter } from './routes/thermostats'
+import { homekitRouter }     from './routes/homekit'
 
 export const router = Router()
 
@@ -26,6 +27,7 @@ router.use('/scenes',      scenesRouter)
 router.use('/automations', automationsRouter)
 router.use('/profiles',    profilesRouter)
 router.use('/thermostats', thermostatsRouter)
+router.use('/homekit',     homekitRouter)
 
 // Owner uniquement
 router.use('/settings', ownerOnly, settingsRouter)
