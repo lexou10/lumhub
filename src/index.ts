@@ -12,6 +12,7 @@ import { authMiddleware } from './api/middleware/auth'
 
 const { startZigbeeService, stopZigbeeService } = require('../dist/services/zigbee')
 const { startThermostatService, stopThermostatService } = require('../dist/services/thermostat')
+const { startAutomationService, stopAutomationService } = require('./services/automations')
 
 const PORT = parseInt(process.env.PORT || '3000', 10)
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000  // 6 heures
@@ -36,6 +37,7 @@ async function start() {
   loadProfiles()
   await startZigbeeService()
   startThermostatService()
+  startAutomationService()
 
   const app = express()
   app.use(helmet())

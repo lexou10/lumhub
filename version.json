@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
-  "releaseDate": "2026-03-13",
-  "changelog": "- Fix ON/OFF Homebridge (casse majuscules)\n- Ajout routes API thermostats\n- Synchronisation états chauffages Homebridge\n- Thermostat réactif (cycle 10s + trigger immédiat)\n- Logique chauffe : temp < consigne = ON, temp >= consigne = OFF"
+  "version": "1.2.0",
+  "releaseDate": "2026-03-17",
+  "changelog": "- Service automatisations (time, sunrise/sunset, device, manuel)\n- Conditions (plage horaire, température, état device)\n- Fix thermostat virtuel dans les automatisations\n- Trigger immédiat sur changement d'état device"
 }

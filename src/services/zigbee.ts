@@ -1,3 +1,4 @@
+import { onDeviceStateChange } from './automations'
 import { getDb } from '../database'
 import { findProfile } from './deviceProfiles'
 import { broadcastDeviceState, broadcastDeviceOnline } from '../websocket'
@@ -96,7 +97,7 @@ export async function sendCommand(ieeeAddress: string, key: string, value: any):
         const states: Record<string, string> = { [key]: String(value) }
         if (key === 'pilot_wire_mode' || key === 'mode') { states['pilot_wire_mode'] = String(value); states['mode'] = String(value) }
         updateDeviceStates(device.id, states)
-        for (const [k, v] of Object.entries(states)) broadcastDeviceState(device.id, k, v)
+        for (const [k, v] of Object.entries(states)) { broadcastDeviceState(device.id, k, v); onDeviceStateChange(device.id, k, String(v)).catch(() => {}) }
         resolve(true)
       }
     })
