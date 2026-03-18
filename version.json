@@ -1,5 +1,5 @@
 {
-  "version": "1.2.2",
+  "version": "1.3.0",
   "releaseDate": "2026-03-18",
-  "changelog": "- Fix schema DB : ajout tables thermostats et thermostat_schedules\n- Fix first-boot : suppression flag avant clonage"
+  "changelog": "- Fix schema DB : ajout tables thermostats et thermostat_schedules\n- Fix first-boot : suppression flag avant clonage\n- Route HomeKit + régénération PIN\n- Scripts prepare-image et first-boot pour déploiement"
 }
