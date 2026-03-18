@@ -216,3 +216,30 @@ CREATE TABLE IF NOT EXISTS migrations (
 );
 
 INSERT OR IGNORE INTO migrations (version) VALUES ('1.0.0');
+
+-- ============================================================
+-- THERMOSTATS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS thermostats (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    room_id         INTEGER NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+    name            TEXT    NOT NULL DEFAULT 'Thermostat',
+    enabled         INTEGER NOT NULL DEFAULT 1,
+    mode            TEXT    NOT NULL DEFAULT 'manual',
+    target_temp     REAL    NOT NULL DEFAULT 19.0,
+    away_temp       REAL    NOT NULL DEFAULT 12.0,
+    hysteresis      REAL    NOT NULL DEFAULT 0.5,
+    created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS thermostat_schedules (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    thermostat_id   INTEGER NOT NULL REFERENCES thermostats(id) ON DELETE CASCADE,
+    day_of_week     INTEGER NOT NULL,
+    time_start      TEXT    NOT NULL,
+    time_end        TEXT    NOT NULL,
+    target_temp     REAL    NOT NULL,
+    label           TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_thermostat_schedules ON thermostat_schedules(thermostat_id);

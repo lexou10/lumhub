@@ -1,5 +1,5 @@
 {
   "version": "1.2.1",
-  "releaseDate": "2026-03-17",
-  "changelog":  "Ajout de l’a configuration Homekit"
+  "releaseDate": "2026-03-18",
+  "changelog": "- Fix schema DB : ajout tables thermostats et thermostat_schedules\n- Fix first-boot : suppression flag avant clonage"
 }
