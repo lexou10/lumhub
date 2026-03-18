@@ -46,6 +46,9 @@ thermostatsRouter.post('/', (req: Request, res: Response) => {
   if (!room_id || !name) { res.status(400).json({ error: 'room_id et name requis' }); return }
   const result = db.prepare(`INSERT INTO thermostats (room_id, name, target_temp) VALUES (?, ?, ?)`).run(room_id, name, target_temp)
   const t = db.prepare('SELECT * FROM thermostats WHERE id = ?').get(result.lastInsertRowid) as any
+  // Créer le device virtuel associé
+  db.prepare(`INSERT OR IGNORE INTO devices (ieee_address, name, type, room_id, is_online) VALUES (?, ?, 'thermostat', ?, 1)`)
+    .run('virtual_thermostat_room_' + room_id, name, room_id)
   res.status(201).json({ ...t, enabled: t.enabled === 1, schedules: [] })
 })
 
@@ -65,8 +68,10 @@ thermostatsRouter.put('/:id', updateThermostat)
 
 thermostatsRouter.delete('/:id', (req: Request, res: Response) => {
   const db = getDb()
+  const th = db.prepare('SELECT room_id FROM thermostats WHERE id = ?').get(req.params.id) as any
   db.prepare('DELETE FROM thermostat_schedules WHERE thermostat_id = ?').run(req.params.id)
   db.prepare('DELETE FROM thermostats WHERE id = ?').run(req.params.id)
+  if (th) db.prepare('DELETE FROM devices WHERE ieee_address = ?').run('virtual_thermostat_room_' + th.room_id)
   res.json({ success: true })
 })
 

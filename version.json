@@ -1,5 +1,5 @@
 {
-  "version": "1.3.1",
+  "version": "1.3.2",
   "releaseDate": "2026-03-18",
-  "changelog": "- Fix schema DB : ajout colonne device_mode dans devices"
+  "changelog": "- Création automatique du device virtuel thermostat\n- Suppression automatique à la suppression du thermostat"
 }
