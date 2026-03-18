@@ -1,5 +1,5 @@
 {
-  "version": "1.3.2",
+  "version": "1.3.3",
   "releaseDate": "2026-03-18",
-  "changelog": "- Création automatique du device virtuel thermostat\n- Suppression automatique à la suppression du thermostat"
+  "changelog": "- Ring LED bleu pendant le pairing Zigbee"
 }

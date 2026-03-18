@@ -192,10 +192,15 @@ devicesRouter.get('/:id/history', (req: Request, res: Response) => {
   res.json(history)
 })
 
+const net = require('net')
+function sendLed(state: string) { try { const s = net.createConnection('/run/lumhub-leds.sock'); s.on('connect', () => { s.write(state); s.end() }); s.on('error', () => {}) } catch {} }
+
+
 // POST /api/v1/devices/pairing/start — activer le pairing (owner uniquement)
 devicesRouter.post('/pairing/start', (req: Request, res: Response) => {
   if (req.user?.role !== 'owner') { res.status(403).json({ error: 'Owner requis' }); return }
   const { duration = 120 } = req.body
+  sendLed('pairing')
   Promise.resolve().then(() => startPairing(duration))
   res.json({ success: true, duration })
 })
@@ -203,6 +208,7 @@ devicesRouter.post('/pairing/start', (req: Request, res: Response) => {
 // POST /api/v1/devices/pairing/stop
 devicesRouter.post('/pairing/stop', (req: Request, res: Response) => {
   if (req.user?.role !== 'owner') { res.status(403).json({ error: 'Owner requis' }); return }
+  sendLed('ok')
   Promise.resolve().then(() => stopPairing())
   res.json({ success: true })
 })
