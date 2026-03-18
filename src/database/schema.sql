@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS devices (
     is_hidden       INTEGER NOT NULL DEFAULT 0,
     last_seen       DATETIME,
     paired_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+    device_mode     TEXT    NOT NULL DEFAULT 'relay',
     notes           TEXT
 );
 
