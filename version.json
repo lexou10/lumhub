@@ -1,5 +1,5 @@
 {
-  "version": "1.3.4",
+  "version": "1.3.6",
   "releaseDate": "2026-03-19",
-  "changelog": "- Colonne display_type pour personnaliser l'affichage des devices\n- Support variateur Schneider Wiser (dimmable_light)\n- Schema DB mis à jour"
+  "changelog": "- Fix route homekit : lit le bon config Homebridge\n- Fix régénération PIN fonctionnelle\n- Permissions fichier homebridge config"
 }

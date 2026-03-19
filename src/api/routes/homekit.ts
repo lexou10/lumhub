@@ -5,7 +5,7 @@ import * as child_process from 'child_process'
 
 export const homekitRouter = Router()
 
-const HOMEBRIDGE_CONFIG = '/var/lib/homebridge/config.json'
+const HOMEBRIDGE_CONFIG = '/home/pi/.homebridge/config.json'
 
 function getConfig(): any {
   return JSON.parse(fs.readFileSync(HOMEBRIDGE_CONFIG, 'utf8'))
