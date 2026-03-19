@@ -245,3 +245,10 @@ CREATE TABLE IF NOT EXISTS thermostat_schedules (
 );
 
 CREATE INDEX IF NOT EXISTS idx_thermostat_schedules ON thermostat_schedules(thermostat_id);
+
+CREATE TABLE IF NOT EXISTS api_tokens (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT    NOT NULL,
+    token       TEXT    NOT NULL UNIQUE,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
+);

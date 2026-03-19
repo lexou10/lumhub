@@ -30,7 +30,38 @@ rm -f /var/lib/homebridge/accessories/cachedAccessories
 rm -f /var/lib/homebridge/persist/*
 echo "[LumHub] HomeKit PIN: $PIN"
 
+# Génère token API permanent pour Homebridge
+HB_TOKEN="hb_$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
+
+# Attend que LumHub soit prêt et que la DB soit initialisée
+for i in $(seq 1 30); do
+    if sqlite3 /var/lib/lumhub/lumhub.db "SELECT count(*) FROM api_tokens;" 2>/dev/null; then
+        break
+    fi
+    echo "[LumHub] Attente DB... ($i/30)"
+    sleep 2
+done
+
+# Insère le token en DB
+sqlite3 /var/lib/lumhub/lumhub.db "INSERT OR REPLACE INTO api_tokens (name, token) VALUES ('homebridge', '$HB_TOKEN');"
+
+# Met à jour les configs Homebridge
+python3 -c "
+import json, sys
+token = sys.argv[1]
+for path in ['/home/pi/.homebridge/config.json', '/var/lib/homebridge/config.json']:
+    try:
+        c = json.load(open(path))
+        for p in c.get('platforms', []):
+            if p.get('platform') == 'LumHub':
+                p['token'] = token
+        json.dump(c, open(path, 'w'), indent=2)
+    except: pass
+" "$HB_TOKEN"
+echo "[LumHub] Token Homebridge généré"
+
 # Reset Zigbee2MQTT
+
 rm -f /opt/zigbee2mqtt/data/database.db
 rm -f /opt/zigbee2mqtt/data/coordinator_backup.json
 echo "[LumHub] Zigbee réinitialisé"

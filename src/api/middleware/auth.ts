@@ -28,6 +28,16 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 
   const token = header.slice(7)
 
+  // Vérifier si c'est un api_token permanent (Homebridge, etc.)
+  const apiToken = getDb()
+    .prepare('SELECT id, name FROM api_tokens WHERE token = ?')
+    .get(token) as any
+  if (apiToken) {
+    req.user = { id: 0, username: apiToken.name, role: 'owner' }
+    next()
+    return
+  }
+
   try {
     const payload = jwt.verify(token, JWT_SECRET) as any
 
