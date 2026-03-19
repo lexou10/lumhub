@@ -61,18 +61,19 @@ devicesRouter.get('/:id', (req: Request, res: Response) => {
 // PATCH /api/v1/devices/:id — renommer, changer de pièce, notes
 devicesRouter.patch('/:id', ownerOrUser, (req: Request, res: Response) => {
   const db = getDb()
-  const { name, room_id, notes } = req.body
+  const { name, room_id, notes, display_type } = req.body
 
   const device = db.prepare('SELECT id FROM devices WHERE id = ?').get(req.params.id)
   if (!device) { res.status(404).json({ error: 'Device non trouvé' }); return }
 
   db.prepare(`
     UPDATE devices SET
-      name    = COALESCE(?, name),
-      room_id = COALESCE(?, room_id),
-      notes   = COALESCE(?, notes)
+      name         = COALESCE(?, name),
+      room_id      = COALESCE(?, room_id),
+      notes        = COALESCE(?, notes),
+      display_type = COALESCE(?, display_type)
     WHERE id = ?
-  `).run(name, room_id, notes, req.params.id)
+  `).run(name, room_id, notes, display_type ?? null, req.params.id)
 
   res.json({ success: true })
 })
