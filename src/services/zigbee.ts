@@ -52,7 +52,7 @@ function upsertDevice(z2mDevice: any): void {
   const name = z2mDevice.friendly_name || ieee
   const profile = findProfile(manufacturer || '', model || '')
   const type = resolveTypeFromZ2M(z2mDevice)
-  db.prepare(`INSERT INTO devices (ieee_address, name, manufacturer, model, profile_id, type, is_online, last_seen) VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP) ON CONFLICT(ieee_address) DO UPDATE SET is_online=1, last_seen=CURRENT_TIMESTAMP, manufacturer=COALESCE(excluded.manufacturer, manufacturer), model=COALESCE(excluded.model, model), profile_id=COALESCE(profile_id, excluded.profile_id)`).run(ieee, name, manufacturer, model, profile?.id || null, type)
+  db.prepare(`INSERT INTO devices (ieee_address, name, manufacturer, model, profile_id, type, is_online, last_seen) VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP) ON CONFLICT(ieee_address) DO UPDATE SET is_online=1, last_seen=CURRENT_TIMESTAMP, manufacturer=COALESCE(excluded.manufacturer, manufacturer), model=COALESCE(excluded.model, model), profile_id=COALESCE(profile_id, excluded.profile_id), type=excluded.type`).run(ieee, name, manufacturer, model, profile?.id || null, type)
 }
 
 function handleDeviceState(friendlyName: string, data: any): void {
@@ -63,7 +63,7 @@ function handleDeviceState(friendlyName: string, data: any): void {
   if (data.linkquality !== undefined) { db.prepare('UPDATE devices SET is_online = 1, last_seen = CURRENT_TIMESTAMP WHERE id = ?').run(device.id); broadcastDeviceOnline(device.id, true) }
   const states = mapZ2MStates(data)
   updateDeviceStates(device.id, states)
-  for (const [key, value] of Object.entries(states)) broadcastDeviceState(device.id, key, value)
+  for (const [key, value] of Object.entries(states)) { broadcastDeviceState(device.id, key, value); onDeviceStateChange(device.id, key, String(value)).catch(() => {}) }
 }
 
 function mapZ2MStates(data: any): Record<string, string> {
