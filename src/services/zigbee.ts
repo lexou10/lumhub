@@ -60,7 +60,8 @@ function handleDeviceState(friendlyName: string, data: any): void {
   let device = db.prepare('SELECT id, name FROM devices WHERE ieee_address = ?').get(friendlyName) as any
   if (!device) device = db.prepare('SELECT id, name FROM devices WHERE LOWER(ieee_address) = ?').get(friendlyName.toLowerCase()) as any
   if (!device) return
-  if (data.linkquality !== undefined) { db.prepare('UPDATE devices SET is_online = 1, last_seen = CURRENT_TIMESTAMP WHERE id = ?').run(device.id); broadcastDeviceOnline(device.id, true) }
+  db.prepare('UPDATE devices SET is_online = 1, last_seen = CURRENT_TIMESTAMP WHERE id = ?').run(device.id)
+  broadcastDeviceOnline(device.id, true)
   const states = mapZ2MStates(data)
   updateDeviceStates(device.id, states)
   for (const [key, value] of Object.entries(states)) { broadcastDeviceState(device.id, key, value); onDeviceStateChange(device.id, key, String(value)).catch(() => {}) }
