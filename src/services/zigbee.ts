@@ -81,6 +81,10 @@ if (data.state !== undefined) {
   if (data.linkquality !== undefined)     s['linkquality'] = String(data.linkquality)
   if (data.power !== undefined)           s['power']       = String(data.power)
   if (data.pilot_wire_mode !== undefined) s['mode']        = String(data.pilot_wire_mode)
+  if (data.position !== undefined)        s['position']    = String(data.position)
+  if (data.state !== undefined && ['OPEN','CLOSE','STOP'].includes(data.state)) s['cover_state'] = String(data.state)
+  if (data.position !== undefined)        s['position']    = String(data.position)
+  if (data.state !== undefined && ['OPEN','CLOSE','STOP'].includes(data.state)) s['cover_state'] = String(data.state)
   return s
 }
 
@@ -110,6 +114,12 @@ function buildMQTTPayload(key: string, value: any, device: any): Record<string, 
   switch (key) {
     case 'state': case 'on': return { state: (String(value).toLowerCase() === 'on' || value === true || value === 'true') ? 'ON' : 'OFF' }
     case 'brightness': return { brightness: Math.round((parseInt(value) / 100) * 254) }
+    case 'position': return { position: parseInt(value) }
+    case 'cover_state': return { state: value }
+    case 'lift_duration': return { lift_duration: parseInt(value) }
+    case 'position': return { position: parseInt(value) }
+    case 'cover_state': return { state: value }
+    case 'lift_duration': return { lift_duration: parseInt(value) }
     case 'color_temp': return { color_temp: parseInt(value) }
     default: return { [key]: value }
   }
@@ -125,6 +135,8 @@ function updateDeviceStates(deviceId: number, states: Record<string, any>): void
 
 function resolveTypeFromZ2M(device: any): string {
   const exposes = (device.definition || {}).exposes || []
+  if (exposes.some((e: any) => e.type === 'cover'))               return 'cover'
+  if (exposes.some((e: any) => e.type === 'cover'))               return 'cover'
   if (exposes.some((e: any) => e.property === 'pilot_wire_mode')) return 'heating'
   if (exposes.some((e: any) => e.property === 'occupancy'))       return 'motion_sensor'
   if (exposes.some((e: any) => e.property === 'temperature'))     return 'temperature_sensor'
