@@ -1,5 +1,5 @@
 {
-  "version": "1.4.2",
+  "version": "1.4.3",
   "releaseDate": "2026-04-20",
-  "changelog": "Homebridge auto-cleanup accessories obsolètes + fix chauffage relay/pilot + support volets HomeKit + mode variateur iOS + gestion WiFi + réinitialisation HomeKit"
+  "changelog": "Affichage lever/coucher du soleil sur le dashboard iOS + fix calcul crépuscule UTC + labels volets automations"
 }

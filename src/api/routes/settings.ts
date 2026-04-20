@@ -65,3 +65,35 @@ profilesRouter.get('/', (_req: Request, res: Response) => {
 profilesRouter.get('/category/:category', (req: Request, res: Response) => {
   res.json(getProfilesByCategory(req.params.category))
 })
+
+// GET /api/v1/settings/sun — lever et coucher du soleil
+settingsRouter.get('/sun', (req: Request, res: Response) => {
+  const db = getDb()
+  const latSetting = db.prepare("SELECT value FROM settings WHERE key = 'latitude'").get() as any
+  const lonSetting = db.prepare("SELECT value FROM settings WHERE key = 'longitude'").get() as any
+  const lat = parseFloat(latSetting?.value || '44.8378')
+  const lon = parseFloat(lonSetting?.value || '-0.5792')
+
+  const now = new Date()
+  const rad = Math.PI / 180
+  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000)
+  const B = (360 / 365) * (dayOfYear - 81) * rad
+  const eqTime = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B)
+  const decl = 23.45 * Math.sin(B) * rad
+  const hourAngle = Math.acos(-Math.tan(lat * rad) * Math.tan(decl)) / rad
+  const noon = 12 - (lon / 15) - (eqTime / 60)
+  const offsetH = hourAngle / 15
+
+  const toTime = (decimal: number) => {
+    const d = new Date(now)
+    d.setUTCHours(Math.floor(decimal), Math.round((decimal - Math.floor(decimal)) * 60), 0, 0)
+    return d.toISOString()
+  }
+
+  res.json({
+    sunrise: toTime(noon - offsetH),
+    sunset: toTime(noon + offsetH),
+    latitude: lat,
+    longitude: lon
+  })
+})

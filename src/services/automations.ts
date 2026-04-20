@@ -248,7 +248,7 @@ function getSunTime(type: 'sunrise' | 'sunset', lat: number, lon: number, date: 
     const h = Math.floor(timeDecimal)
     const m = Math.round((timeDecimal - h) * 60)
     const result = new Date(date)
-    result.setHours(h, m, 0, 0)
+    result.setUTCHours(h, m, 0, 0)
     return result
   } catch {
     return null
