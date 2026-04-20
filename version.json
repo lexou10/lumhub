@@ -1,5 +1,5 @@
 {
-  "version": "1.3.8",
-  "releaseDate": "2026-03-21",
-  "changelog": "- Fix automatisations device trigger (occupancy, contact, état)\n- Fix détection type Legrand interrupteur vs chauffage\n- Fix upsertDevice met à jour le type au re-appairage"
+  "version": "1.4.0",
+  "releaseDate": "2026-04-20",
+  "changelog":  "ajoute un onglet réseau afin de modifier le réseau wi-fi connecté, ajout d'un bouton pour la réinitialisation de HomeKit"
 }
