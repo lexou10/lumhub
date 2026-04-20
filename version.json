@@ -1,5 +1,5 @@
 {
-  "version": "1.4.1",
+  "version": "1.4.2",
   "releaseDate": "2026-04-20",
-  "changelog":  "ajoute un onglet réseau afin de modifier le réseau wi-fi connecté, ajout d'un bouton pour la réinitialisation de HomeKit"
+  "changelog": "Homebridge auto-cleanup accessories obsolètes + fix chauffage relay/pilot + support volets HomeKit + mode variateur iOS + gestion WiFi + réinitialisation HomeKit"
 }
