@@ -9,6 +9,7 @@ import { initWebSocket } from './websocket'
 import { router } from './api/router'
 import updateRoutes from './api/routes/update'
 import { authMiddleware } from './api/middleware/auth'
+import path from 'path'
 
 const { startZigbeeService, stopZigbeeService } = require('../dist/services/zigbee')
 const { startThermostatService, stopThermostatService } = require('../dist/services/thermostat')
@@ -40,7 +41,9 @@ async function start() {
   startAutomationService()
 
   const app = express()
-  app.use(helmet())
+  app.use(helmet({
+    contentSecurityPolicy: false
+  }))
   app.use(cors({ origin: '*' }))
   app.use(express.json())
 
@@ -48,7 +51,10 @@ async function start() {
   app.use('/api/v1/update', authMiddleware, updateRoutes)
 
   app.get('/health', (_, res) => res.json({ status: 'ok', version: '1.0.0', uptime: process.uptime() }))
-
+app.use(express.static(path.join(__dirname, '../public')))
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/dashboard.html'))
+})
   const httpServer = createServer(app)
   initWebSocket(httpServer)
 

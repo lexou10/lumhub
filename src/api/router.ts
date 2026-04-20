@@ -12,6 +12,7 @@ import { settingsRouter }    from './routes/settings'
 import { profilesRouter }    from './routes/profiles'
 import { thermostatsRouter } from './routes/thermostats'
 import { homekitRouter }     from './routes/homekit'
+import { wifiRouter }        from './routes/wifi'
 
 export const router = Router()
 
@@ -31,3 +32,4 @@ router.use('/homekit',     homekitRouter)
 
 // Owner uniquement
 router.use('/settings', ownerOnly, settingsRouter)
+router.use('/wifi',     ownerOnly, wifiRouter)

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>LumHome</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
+<style>
+  :root {
+    --bg:        #0d0f12;
+    --surface:   #161920;
+    --surface2:  #1e2230;
+    --border:    rgba(255,255,255,0.07);
+    --accent:    #e8823a;
+    --accent2:   #5b8dee;
+    --green:     #4caf80;
+    --red:       #e85c5c;
+    --text:      #e8eaf0;
+    --muted:     #6b7280;
+    --sidebar:   220px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow: hidden; }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    flex-shrink: 0;
+  }
+  .logo {
+    padding: 16px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo img { height: 52px; border-radius: 6px; }
+
+  .clock-block {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .clock {
+    font-family: 'DM Mono', monospace;
+    font-size: 42px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .date-str {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .weather-block {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .weather-row { display: flex; align-items: center; gap: 10px; }
+  .weather-temp { font-size: 28px; font-weight: 300; color: var(--text); }
+  .weather-icon { font-size: 26px; }
+  .weather-desc { font-size: 11px; color: var(--muted); margin-top: 2px; text-transform: capitalize; }
+  .weather-city { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); opacity: 0.6; }
+
+  /* THERMOSTATS SIDEBAR */
+  .thermo-block {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    flex: 1;
+    overflow-y: auto;
+  }
+  .block-title {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .thermo-card {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+  }
+  .thermo-card:hover { border-color: var(--accent); }
+  .thermo-name { font-size: 12px; font-weight: 500; margin-bottom: 8px; color: var(--text); }
+  .thermo-temps { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .thermo-current { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 300; color: var(--text); }
+  .thermo-target { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); }
+  .thermo-controls { display: flex; align-items: center; gap: 6px; }
+  .thermo-btn {
+    width: 26px; height: 26px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .thermo-btn:hover { background: var(--accent); border-color: var(--accent); color: white; }
+  .thermo-toggle {
+    flex: 1;
+    height: 26px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .thermo-toggle.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .nav { padding: 16px 12px 0; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--surface2); color: var(--accent); border-color: var(--border); }
+  .nav-icon { font-size: 16px; }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+  .main::-webkit-scrollbar { width: 4px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+  .main::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 28px;
+  }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .sleep-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .sleep-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--text);
+  }
+  .status-pill {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+  }
+  .status-pill.online .status-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .devices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  /* ── DEVICE CARD ── */
+  .device-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .device-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: transparent;
+    transition: background 0.3s;
+  }
+  .device-card.on::before { background: var(--accent); }
+  .device-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-1px); }
+
+  .device-icon { width: 32px; height: 32px; margin-bottom: 10px; }
+  .dev-badge { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; flex-shrink: 0; }
+  .badge-off  { background: rgba(107,114,128,0.12); }
+  .badge-on   { background: rgba(232,130,58,0.15); }
+  .badge-blue { background: rgba(91,141,238,0.12); }
+  .device-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
+  .device-state { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .device-state.on { color: var(--accent); }
+
+  /* Brightness slider */
+  .brightness-wrap { margin-top: 10px; }
+  .brightness-slider {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--surface2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .brightness-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(232,130,58,0.5);
+  }
+  .brightness-val { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 4px; text-align: right; }
+
+  /* Sensor card */
+  .sensor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .sensor-name { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; }
+  .sensor-value { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 300; color: var(--text); line-height: 1; }
+  .sensor-unit { font-size: 14px; color: var(--muted); }
+  .sensor-sub { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--accent2); margin-top: 4px; }
+  .sensor-battery { font-size: 10px; color: var(--muted); margin-top: 6px; }
+
+  /* Cover card */
+  .cover-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .cover-name { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+  .cover-pos {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 300;
+    margin-bottom: 10px;
+  }
+  .cover-bar-wrap {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .cover-bar {
+    height: 100%;
+    background: var(--accent2);
+    border-radius: 3px;
+    transition: width 0.5s;
+  }
+  .cover-btns { display: flex; gap: 6px; }
+  .cover-btn {
+    flex: 1;
+    height: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .cover-btn:hover { background: var(--accent2); border-color: var(--accent2); }
+  .cover-slider-wrap { margin-top: 10px; }
+  .cover-slider {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--surface2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .cover-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--accent2);
+    cursor: pointer;
+  }
+
+  /* Motion sensor */
+  .motion-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    transition: border-color 0.3s;
+  }
+  .motion-card.detected { border-color: var(--accent); }
+  .motion-icon { font-size: 28px; margin-bottom: 8px; }
+  .motion-name { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  .motion-state { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .motion-state.detected { color: var(--accent); }
+
+  /* ── AUTOMATIONS PAGE ── */
+  .auto-list { display: flex; flex-direction: column; gap: 10px; }
+  .auto-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.2s;
+  }
+  .auto-card:hover { border-color: rgba(255,255,255,0.15); }
+  .auto-icon { font-size: 20px; width: 36px; text-align: center; }
+  .auto-info { flex: 1; }
+  .auto-name { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
+  .auto-meta { font-size: 11px; color: var(--muted); }
+  .auto-last { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+  /* Sleep overlay */
+  .sleep-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: black;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    cursor: pointer;
+  }
+  .sleep-overlay.active { display: flex; }
+  .sleep-clock {
+    font-family: 'DM Mono', monospace;
+    font-size: 96px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.15);
+    letter-spacing: -4px;
+  }
+  .sleep-date {
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.05);
+    margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="/logo.png" alt="LumHome" onerror="this.style.display='none'">
+    </div>
+
+    <div class="clock-block">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date-str" id="dateStr">--</div>
+    </div>
+
+    <div class="weather-block">
+      <div class="weather-row">
+        <div class="weather-icon" id="weatherIcon">☁</div>
+        <div>
+          <div class="weather-temp"><span id="weatherTemp">--</span>°</div>
+          <div class="weather-desc" id="weatherDesc">Chargement...</div>
+        </div>
+      </div>
+      <div class="weather-city">Bordeaux</div>
+    </div>
+
+    <div class="thermo-block" id="thermoSidebar">
+      <div class="block-title">Thermostats</div>
+      <!-- rempli dynamiquement -->
+    </div>
+
+    <nav class="nav">
+      <div class="nav-item active" data-page="devices">
+        <span class="nav-icon"><i data-lucide="home" style="width:16px;height:16px;stroke:currentColor;stroke-width:1.5;fill:none"></i></span> Appareils
+      </div>
+      <div class="nav-item" data-page="automations">
+        <span class="nav-icon"><i data-lucide="zap" style="width:16px;height:16px;stroke:currentColor;stroke-width:1.5;fill:none"></i></span> Automations
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- PAGE APPAREILS -->
+    <div class="page active" id="page-devices">
+      <div class="page-header">
+        <h1 class="page-title">Appareils</h1>
+        <div class="header-right">
+          <button class="sleep-btn" onclick="goSleep()">🌙 Veille</button>
+          <div class="status-pill" id="statusPill">
+            <span class="status-dot"></span>
+            <span id="statusText">Connexion...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section" id="section-lights">
+        <div class="section-title">Lumières</div>
+        <div class="devices-grid" id="grid-lights"></div>
+      </div>
+
+      <div class="section" id="section-covers">
+        <div class="section-title">Volets</div>
+        <div class="devices-grid" id="grid-covers"></div>
+      </div>
+
+      <div class="section" id="section-heating">
+        <div class="section-title">Chauffage fil pilote</div>
+        <div class="devices-grid" id="grid-heating"></div>
+      </div>
+
+      <div class="section" id="section-sensors">
+        <div class="section-title">Capteurs</div>
+        <div class="devices-grid" id="grid-sensors"></div>
+      </div>
+    </div>
+
+    <!-- PAGE AUTOMATIONS -->
+    <div class="page" id="page-automations">
+      <div class="page-header">
+        <h1 class="page-title">Automations</h1>
+      </div>
+      <div class="auto-list" id="autoList"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- SLEEP OVERLAY -->
+<div class="sleep-overlay" id="sleepOverlay" onclick="wakeUp()">
+  <div class="sleep-clock" id="sleepClock">--:--</div>
+  <div class="sleep-date" id="sleepDate">--</div>
+</div>
+
+<script>
+const API        = 'http://192.168.1.66:3000';
+
+// ── ICÔNES SVG ──
+const ICONS = {
+  bulb_off: `<div class="dev-badge badge-off"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M10 17h4M12 3a6 6 0 00-3 11.2V17h6v-2.8A6 6 0 0012 3z"/></svg></div>`,
+  bulb_on:  `<div class="dev-badge badge-on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e8823a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M10 17h4M12 3a6 6 0 00-3 11.2V17h6v-2.8A6 6 0 0012 3z" fill="rgba(232,130,58,0.2)"/><line x1="12" y1="1" x2="12" y2="0.5"/><line x1="4.5" y1="4.5" x2="5.2" y2="5.2"/><line x1="19.5" y1="4.5" x2="18.8" y2="5.2"/><line x1="2" y1="11" x2="3" y2="11"/><line x1="22" y1="11" x2="21" y2="11"/></svg></div>`,
+  heat_off: `<div class="dev-badge badge-off"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="9" rx="2"/><line x1="8" y1="9" x2="8" y2="18"/><line x1="13" y1="9" x2="13" y2="18"/><line x1="3" y1="21" x2="21" y2="21"/></svg></div>`,
+  heat_on:  `<div class="dev-badge badge-on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e8823a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="9" rx="2" fill="rgba(232,130,58,0.15)"/><line x1="8" y1="9" x2="8" y2="18"/><line x1="13" y1="9" x2="13" y2="18"/><line x1="3" y1="21" x2="21" y2="21"/><path d="M7 6c0-1 1.5-1 1.5-2M12 6c0-1 1.5-1 1.5-2M17 6c0-1 1.5-1 1.5-2"/></svg></div>`,
+  cover:    `<div class="dev-badge badge-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b8dee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="13" x2="21" y2="13"/><polyline points="9 5 12 3 15 5"/></svg></div>`,
+  thermo:   `<div class="dev-badge badge-blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5b8dee" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V4a2 2 0 00-4 0v10.76a4 4 0 104 0z" fill="rgba(91,141,238,0.15)"/><line x1="10" y1="8" x2="8" y2="8"/><line x1="10" y1="11" x2="8" y2="11"/></svg></div>`,
+  motion_off: `<div class="dev-badge badge-off"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12h-.5a7 7 0 0114 0h-.5"/><path d="M8.5 12a3.5 3.5 0 017 0"/><circle cx="12" cy="12" r="1.5" fill="#6b7280"/></svg></div>`,
+  motion_on:  `<div class="dev-badge badge-on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e8823a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 12h-.5a7 7 0 0114 0h-.5"/><path d="M8.5 12a3.5 3.5 0 017 0"/><circle cx="12" cy="12" r="1.5" fill="#e8823a"/></svg></div>`,
+};
+const TOKEN      = 'dash_530245a2de4fdf1c6a76bfd293776c0402a4cb420e01d15f5cde1144e23a8b54';
+const HEADERS    = { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' };
+const SLEEP_DELAY = 5 * 60 * 1000;
+const WEATHER_LAT = 44.8378;
+const WEATHER_LON = -0.5792;
+
+let sleepTimer;
+let devicesCache = [];
+
+// ── HORLOGE ──
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const timeStr = h + ':' + m;
+  document.getElementById('clock').textContent = timeStr;
+  document.getElementById('sleepClock').textContent = timeStr;
+  const days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const months = ['Janv','Févr','Mars','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'];
+  const ds = days[now.getDay()] + ' ' + now.getDate() + ' ' + months[now.getMonth()];
+  document.getElementById('dateStr').textContent = ds;
+  document.getElementById('sleepDate').textContent = ds;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── MÉTÉO ──
+async function fetchWeather() {
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current_weather=true&hourly=relativehumidity_2m`);
+    const d = await r.json();
+    const wc = d.current_weather.weathercode;
+    const temp = Math.round(d.current_weather.temperature);
+    const icons = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',61:'🌧',71:'❄️',80:'🌦',95:'⛈'};
+    const descs = {0:'Ensoleillé',1:'Peu nuageux',2:'Partiellement nuageux',3:'Couvert',45:'Brouillard',51:'Bruine',61:'Pluie',71:'Neige',80:'Averses',95:'Orages'};
+    const icon = icons[wc] || icons[Math.floor(wc/10)*10] || '🌡';
+    const desc = descs[wc] || descs[Math.floor(wc/10)*10] || '';
+    document.getElementById('weatherTemp').textContent = temp;
+    document.getElementById('weatherIcon').textContent = icon;
+    document.getElementById('weatherDesc').textContent = desc;
+  } catch(e) {}
+}
+fetchWeather();
+setInterval(fetchWeather, 10 * 60 * 1000);
+
+// ── NAVIGATION ──
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    const page = item.dataset.page;
+    document.getElementById('page-' + page).classList.add('active');
+    if (page === 'automations') fetchAutomations();
+    resetSleep();
+  });
+});
+
+// ── SLEEP ──
+function resetSleep() {
+  clearTimeout(sleepTimer);
+  sleepTimer = setTimeout(goSleep, SLEEP_DELAY);
+}
+function goSleep() { document.getElementById('sleepOverlay').classList.add('active'); }
+function wakeUp() { document.getElementById('sleepOverlay').classList.remove('active'); resetSleep(); }
+document.addEventListener('touchstart', resetSleep);
+document.addEventListener('mousemove', resetSleep);
+resetSleep();
+
+// ── DEVICES ──
+async function fetchDevices() {
+  try {
+    const r = await fetch(`${API}/api/v1/devices`, { headers: HEADERS, signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error(r.status);
+    const devices = await r.json();
+    devicesCache = devices;
+    renderDevices(devices);
+    setStatus(true);
+  } catch(e) {
+    setStatus(false);
+  }
+}
+
+function setStatus(online) {
+  const pill = document.getElementById('statusPill');
+  const text = document.getElementById('statusText');
+  pill.className = 'status-pill' + (online ? ' online' : '');
+  text.textContent = online ? 'Connecté' : 'Hors ligne';
+}
+
+function getStates(device) {
+  const s = device.states || {};
+  if (typeof s === 'string') return {};
+  if (typeof s === 'object' && !Array.isArray(s)) return s;
+  return {};
+}
+
+function renderDevices(devices) {
+  const lights    = devices.filter(d => d.type === 'light' || d.type === 'dimmable_light');
+  const covers    = devices.filter(d => d.type === 'cover');
+  const heating   = devices.filter(d => d.type === 'heating');
+  const sensors   = devices.filter(d => d.type === 'temperature_sensor' || d.type === 'motion_sensor' || d.type === 'humidity_sensor');
+
+  renderLights(lights);
+  renderCovers(covers);
+  renderHeating(heating);
+  renderSensors(sensors);
+  if (window.lucide) lucide.createIcons();
+}
+
+// ── LUMIÈRES ──
+function renderLights(lights) {
+  const grid = document.getElementById('grid-lights');
+  grid.innerHTML = '';
+  lights.forEach(d => {
+    const states = getStates(d);
+    const isOn = states.on === 'true' || states.state === 'on';
+    const isDimmable = d.type === 'dimmable_light';
+    const brightness = parseInt(states.brightness) || 0;
+
+    const card = document.createElement('div');
+    card.className = 'device-card' + (isOn ? ' on' : '');
+    card.dataset.id = d.id;
+    card.onclick = () => toggleDevice(d.id, !isOn, d.type);
+    card.innerHTML = `
+      ${isOn ? ICONS.bulb_on : ICONS.bulb_off}
+      <div class="device-name">${d.name}</div>
+      <div class="device-state ${isOn ? 'on' : ''}">${isOn ? 'Allumé' : 'Éteint'}</div>
+      ${isDimmable ? `
+      <div class="brightness-wrap" onclick="event.stopPropagation()">
+        <input type="range" class="brightness-slider" min="0" max="100" value="${brightness}"
+          oninput="updateBrightnessLabel(this)"
+          onchange="setBrightness(${d.id}, this.value)">
+        <div class="brightness-val">${brightness}%</div>
+      </div>` : ''}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function updateBrightnessLabel(slider) {
+  const wrap = slider.parentElement;
+  wrap.querySelector('.brightness-val').textContent = slider.value + '%';
+}
+
+async function toggleDevice(id, on, type) {
+  const payload = { key: 'state', value: on ? 'ON' : 'OFF' };
+  try {
+    await fetch(`${API}/api/v1/devices/${id}/control`, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify(payload)
+    });
+    const card = document.querySelector(`.device-card[data-id="${id}"]`);
+    if (card) {
+      card.classList.toggle('on', on);
+      card.onclick = () => toggleDevice(id, !on, type);
+      const badgeEl = card.querySelector('.dev-badge');
+      if (badgeEl) badgeEl.outerHTML = on ? ICONS.bulb_on : ICONS.bulb_off;
+      const stateEl = card.querySelector('.device-state');
+      if (stateEl) { stateEl.textContent = on ? 'Allumé' : 'Éteint'; stateEl.className = 'device-state' + (on ? ' on' : ''); }
+    }
+  } catch(e) {}
+  resetSleep();
+}
+
+async function setBrightness(id, value) {
+  try {
+    await fetch(`${API}/api/v1/devices/${id}/control`, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify({ key: 'brightness', value: parseInt(value) })
+    });
+  } catch(e) {}
+  resetSleep();
+}
+
+// ── CHAUFFAGE ──
+function renderHeating(devices) {
+  const grid = document.getElementById('grid-heating');
+  grid.innerHTML = '';
+  devices.forEach(d => {
+    const states = getStates(d);
+    const deviceMode = d.device_mode || 'relay'; // 'relay' ou 'pilot'
+    const power = states.power ? parseFloat(states.power).toFixed(0) + 'W' : '';
+
+    let isOn, stateLabel;
+    if (deviceMode === 'pilot') {
+      const pwMode = states.pilot_wire_mode || 'off';
+      isOn = pwMode !== 'off';
+      stateLabel = pwMode === 'comfort' ? 'Confort' : pwMode === 'eco' ? 'Éco' : pwMode === 'frost_protection' ? 'Hors-gel' : 'Éteint';
+    } else {
+      isOn = states.state === 'on' || states.on === 'true';
+      stateLabel = isOn ? 'Allumé' : 'Éteint';
+    }
+
+    const card = document.createElement('div');
+    card.className = 'device-card' + (isOn ? ' on' : '');
+    card.dataset.id = d.id;
+    card.dataset.deviceMode = deviceMode;
+    card.onclick = () => toggleHeating(d.id, !isOn, deviceMode);
+    card.innerHTML = `
+      ${isOn ? ICONS.heat_on : ICONS.heat_off}
+      <div class="device-name">${d.name}</div>
+      <div class="device-state ${isOn ? 'on' : ''}">${stateLabel}${power ? ' · ' + power : ''}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function toggleHeating(id, on, deviceMode) {
+  let payload;
+  if (deviceMode === 'pilot') {
+    payload = { key: 'pilot_wire_mode', value: on ? 'comfort' : 'off' };
+  } else {
+    payload = { key: 'state', value: on ? 'ON' : 'OFF' };
+  }
+  try {
+    await fetch(`${API}/api/v1/devices/${id}/control`, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify(payload)
+    });
+    const card = document.querySelector(`.device-card[data-id="${id}"]`);
+    if (card) {
+      card.classList.toggle('on', on);
+      card.onclick = () => toggleHeating(id, !on, deviceMode);
+      const iconEl = card.querySelector('.dev-badge');
+      if (iconEl) iconEl.outerHTML = on ? ICONS.heat_on : ICONS.heat_off;
+      const stateEl = card.querySelector('.device-state');
+      if (stateEl) {
+        const label = deviceMode === 'pilot' ? (on ? 'Confort' : 'Éteint') : (on ? 'Allumé' : 'Éteint');
+        stateEl.textContent = label;
+        stateEl.className = 'device-state' + (on ? ' on' : '');
+      }
+    }
+  } catch(e) {}
+  resetSleep();
+}
+
+// ── VOLETS ──
+function renderCovers(covers) {
+  const grid = document.getElementById('grid-covers');
+  grid.innerHTML = '';
+  covers.forEach(d => {
+    const states = getStates(d);
+    const pos = parseInt(states.position) || 0;
+    const card = document.createElement('div');
+    card.className = 'cover-card';
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;margin-bottom:8px;gap:8px">
+        ${ICONS.cover}
+        <span class="device-name" style="margin:0">${d.name}</span>
+      </div>
+      <div class="cover-pos">${pos}<span style="font-size:14px;color:var(--muted)">%</span></div>
+      <div class="cover-bar-wrap"><div class="cover-bar" style="width:${pos}%"></div></div>
+      <div class="cover-btns">
+        <button class="cover-btn" onclick="coverCmd(${d.id},'OPEN')">▲</button>
+        <button class="cover-btn" onclick="coverCmd(${d.id},'STOP')">⏹</button>
+        <button class="cover-btn" onclick="coverCmd(${d.id},'CLOSE')">▼</button>
+      </div>
+      <div class="cover-slider-wrap">
+        <input type="range" class="cover-slider" min="0" max="100" value="${pos}"
+          onchange="coverPos(${d.id}, this.value)">
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function coverCmd(id, state) {
+  try {
+    await fetch(`${API}/api/v1/devices/${id}/control`, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify({ key: 'cover_state', value: state })
+    });
+  } catch(e) {}
+  resetSleep();
+}
+
+async function coverPos(id, value) {
+  try {
+    await fetch(`${API}/api/v1/devices/${id}/control`, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify({ key: 'position', value: parseInt(value) })
+    });
+  } catch(e) {}
+  resetSleep();
+}
+
+// ── CAPTEURS ──
+function renderSensors(sensors) {
+  const grid = document.getElementById('grid-sensors');
+  grid.innerHTML = '';
+  sensors.forEach(d => {
+    const states = getStates(d);
+
+    if (d.type === 'motion_sensor') {
+      const detected = states.occupancy === 'true';
+      const card = document.createElement('div');
+      card.className = 'motion-card' + (detected ? ' detected' : '');
+      card.innerHTML = `
+        <div class="motion-icon">${detected ? ICONS.motion_on : ICONS.motion_off}</div>
+        <div class="motion-name">${d.name}</div>
+        <div class="motion-state ${detected ? 'detected' : ''}">${detected ? 'Mouvement détecté' : 'Aucun mouvement'}</div>
+      `;
+      grid.appendChild(card);
+    } else {
+      const temp = states.temperature ? (parseInt(states.temperature) / 100).toFixed(1) : '--';
+      const hum  = states.humidity    ? (parseInt(states.humidity) / 100).toFixed(0) + '%' : '';
+      const bat  = states.battery ? states.battery + '%' : '';
+      const card = document.createElement('div');
+      card.className = 'sensor-card';
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          ${ICONS.thermo}
+          <span class="sensor-name" style="margin:0">${d.name}</span>
+        </div>
+        <div class="sensor-value">${temp}<span class="sensor-unit">°C</span></div>
+        ${hum ? `<div class="sensor-sub">💧 ${hum}</div>` : ''}
+        ${bat ? `<div class="sensor-battery">🔋 ${bat}</div>` : ''}
+      `;
+      grid.appendChild(card);
+    }
+  });
+}
+
+// ── THERMOSTATS SIDEBAR ──
+async function fetchThermostats() {
+  try {
+    const r = await fetch(`${API}/api/v1/thermostats`, { headers: HEADERS, signal: AbortSignal.timeout(5000) });
+    const thermostats = await r.json();
+    renderThermostats(thermostats);
+  } catch(e) {}
+}
+
+function renderThermostats(thermostats) {
+  const container = document.getElementById('thermoSidebar');
+  container.innerHTML = '<div class="block-title">Thermostats</div>';
+  thermostats.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'thermo-card';
+    card.innerHTML = `
+      <div class="thermo-name">${t.name}</div>
+      <div class="thermo-temps">
+        <div class="thermo-current">${parseFloat(t.current_temp).toFixed(1)}<span style="font-size:12px;color:var(--muted)">°</span></div>
+        <div class="thermo-target" id="tt-${t.id}">${parseFloat(t.target_temp).toFixed(1)}° cible</div>
+      </div>
+      <div class="thermo-controls">
+        <button class="thermo-btn" onclick="adjustThermo(${t.id}, -0.5)">−</button>
+        <button class="thermo-toggle ${t.enabled ? 'active' : ''}" id="tb-${t.id}" onclick="toggleThermo(${t.id})">${t.enabled ? 'Actif' : 'Inactif'}</button>
+        <button class="thermo-btn" onclick="adjustThermo(${t.id}, +0.5)">+</button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+let thermoTargets = {};
+async function adjustThermo(id, delta) {
+  if (!thermoTargets[id]) {
+    // récupère la valeur actuelle
+    try {
+      const r = await fetch(`${API}/api/v1/thermostats/${id}`, { headers: HEADERS });
+      const t = await r.json();
+      thermoTargets[id] = parseFloat(t.target_temp);
+    } catch(e) { return; }
+  }
+  thermoTargets[id] = Math.round((thermoTargets[id] + delta) * 2) / 2;
+  document.getElementById('tt-' + id).textContent = thermoTargets[id].toFixed(1) + '° cible';
+  try {
+    await fetch(`${API}/api/v1/thermostats/${id}`, {
+      method: 'PUT', headers: HEADERS,
+      body: JSON.stringify({ target_temp: thermoTargets[id] })
+    });
+  } catch(e) {}
+  resetSleep();
+}
+
+async function toggleThermo(id) {
+  try {
+    const r = await fetch(`${API}/api/v1/thermostats/${id}`, { headers: HEADERS });
+    const t = await r.json();
+    const newEnabled = !t.enabled;
+    await fetch(`${API}/api/v1/thermostats/${id}`, {
+      method: 'PUT', headers: HEADERS,
+      body: JSON.stringify({ enabled: newEnabled })
+    });
+    const btn = document.getElementById('tb-' + id);
+    if (btn) { btn.textContent = newEnabled ? 'Actif' : 'Inactif'; btn.className = 'thermo-toggle' + (newEnabled ? ' active' : ''); }
+  } catch(e) {}
+  resetSleep();
+}
+
+// ── AUTOMATIONS ──
+async function fetchAutomations() {
+  try {
+    const r = await fetch(`${API}/api/v1/automations`, { headers: HEADERS, signal: AbortSignal.timeout(5000) });
+    const autos = await r.json();
+    renderAutomations(autos);
+  } catch(e) {}
+}
+
+function autoIcon(type) {
+  const icons = { time:'clock', device:'cpu', sunrise:'sunrise', sunset:'sunset', manual:'hand' };
+  const name = icons[type] || 'zap';
+  return `<i data-lucide="${name}" style="width:20px;height:20px;stroke:var(--accent);stroke-width:1.5;fill:none"></i>`;
+}
+
+function renderAutomations(autos) {
+  const list = document.getElementById('autoList');
+  list.innerHTML = '';
+  autos.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'auto-card';
+    const last = a.last_triggered ? new Date(a.last_triggered).toLocaleString('fr-FR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'Jamais';
+    card.innerHTML = `
+      <div class="auto-icon">${autoIcon(a.trigger_type)}</div>
+      <div class="auto-info">
+        <div class="auto-name">${a.name}</div>
+        <div class="auto-meta">${a.trigger_type}</div>
+        <div class="auto-last">Dernier déclenchement : ${last}</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" ${a.enabled ? 'checked' : ''} onchange="toggleAuto(${a.id}, this.checked)">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    `;
+    list.appendChild(card);
+  });
+  if (window.lucide) lucide.createIcons();
+}
+
+async function toggleAuto(id, enabled) {
+  try {
+    await fetch(`${API}/api/v1/automations/${id}`, {
+      method: 'PATCH', headers: HEADERS,
+      body: JSON.stringify({ enabled })
+    });
+  } catch(e) {}
+  resetSleep();
+}
+
+// ── INIT ──
+fetchDevices();
+fetchThermostats();
+setInterval(fetchDevices, 15000);
+setInterval(fetchThermostats, 30000);
+document.addEventListener('DOMContentLoaded', () => { if (window.lucide) lucide.createIcons(); });
+</script>
+</body>
+</html>

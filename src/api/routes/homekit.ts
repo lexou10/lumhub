@@ -45,12 +45,25 @@ homekitRouter.post('/regenerate', ownerOnly, (req: Request, res: Response) => {
     saveConfig(config)
 
     // Redémarre Homebridge pour appliquer le nouveau PIN
-    child_process.exec('sudo systemctl restart homebridge', (err) => {
+    child_process.exec('sudo systemctl restart homebridge', (err: any) => {
       if (err) console.error('[HomeKit] Erreur restart homebridge:', err.message)
     })
 
     res.json({ pin: newPin, message: 'PIN régénéré, Homebridge redémarre...' })
   } catch (e: any) {
+    res.status(500).json({ error: e.message })
+  }
+})
+
+// POST /api/v1/homekit/reset — réinitialise le cache Homebridge
+homekitRouter.post('/reset', async (req, res) => {
+  try {
+    const { exec } = require('child_process')
+    exec('sudo systemctl stop homebridge && rm -f /home/pi/.homebridge/accessories/cachedAccessories /home/pi/.homebridge/persist/*.json && sudo systemctl start homebridge', (err: any) => {
+      if (err) console.error('[HomeKit Reset]', err.message)
+    })
+    res.json({ success: true, message: 'Réinitialisation en cours...' })
+  } catch(e: any) {
     res.status(500).json({ error: e.message })
   }
 })
