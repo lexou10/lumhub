@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "releaseDate": "2026-04-20",
   "changelog":  "ajoute un onglet réseau afin de modifier le réseau wi-fi connecté, ajout d'un bouton pour la réinitialisation de HomeKit"
 }
