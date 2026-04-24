@@ -52,7 +52,18 @@ function upsertDevice(z2mDevice: any): void {
   const name = z2mDevice.friendly_name || ieee
   const profile = findProfile(manufacturer || '', model || '')
   const type = resolveTypeFromZ2M(z2mDevice)
+  const existing = db.prepare('SELECT id FROM devices WHERE ieee_address = ?').get(ieee)
   db.prepare(`INSERT INTO devices (ieee_address, name, manufacturer, model, profile_id, type, is_online, last_seen) VALUES (?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP) ON CONFLICT(ieee_address) DO UPDATE SET is_online=1, last_seen=CURRENT_TIMESTAMP, manufacturer=COALESCE(excluded.manufacturer, manufacturer), model=COALESCE(excluded.model, model), profile_id=COALESCE(profile_id, excluded.profile_id), type=excluded.type`).run(ieee, name, manufacturer, model, profile?.id || null, type)
+  if (!existing) {
+    console.log(`[Zigbee] Nouveau device détecté: ${name} (${ieee}) — redémarrage Homebridge`)
+    const { exec } = require('child_process')
+    setTimeout(() => {
+      exec('sudo systemctl restart homebridge', (err: any) => {
+        if (err) console.error('[Zigbee] Erreur redémarrage Homebridge:', err.message)
+        else console.log('[Zigbee] Homebridge redémarré pour intégrer le nouveau device')
+      })
+    }, 10000) // attend 10s que le device soit bien configuré
+  }
 }
 
 function handleDeviceState(friendlyName: string, data: any): void {

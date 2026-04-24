@@ -14,6 +14,7 @@ import path from 'path'
 const { startZigbeeService, stopZigbeeService } = require('../dist/services/zigbee')
 const { startThermostatService, stopThermostatService } = require('../dist/services/thermostat')
 const { startAutomationService, stopAutomationService } = require('./services/automations')
+const { startPoolService, stopPoolService } = require('./services/pool')
 
 const PORT = parseInt(process.env.PORT || '3000', 10)
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000  // 6 heures
@@ -39,6 +40,7 @@ async function start() {
   await startZigbeeService()
   startThermostatService()
   startAutomationService()
+  startPoolService()
 
   const app = express()
   app.use(helmet({

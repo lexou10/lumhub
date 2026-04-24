@@ -10,7 +10,8 @@ import { scenesRouter }      from './routes/scenes'
 import { automationsRouter } from './routes/automations'
 import { settingsRouter }    from './routes/settings'
 import { profilesRouter }    from './routes/profiles'
-import { thermostatsRouter } from './routes/thermostats'
+import { thermostatsRouter }     from './routes/thermostats'
+import { poolRouter }            from './routes/pool'
 import { homekitRouter }     from './routes/homekit'
 import { wifiRouter }        from './routes/wifi'
 
@@ -29,6 +30,7 @@ router.use('/automations', automationsRouter)
 router.use('/profiles',    profilesRouter)
 router.use('/thermostats', thermostatsRouter)
 router.use('/homekit',     homekitRouter)
+router.use('/pool',       authMiddleware, poolRouter)
 
 // Owner uniquement
 router.use('/settings', ownerOnly, settingsRouter)

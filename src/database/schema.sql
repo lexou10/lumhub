@@ -252,3 +252,29 @@ CREATE TABLE IF NOT EXISTS api_tokens (
     token       TEXT    NOT NULL UNIQUE,
     created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Piscine
+CREATE TABLE IF NOT EXISTS pools (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  name            TEXT    NOT NULL DEFAULT 'Piscine',
+  pump_device_id  INTEGER REFERENCES devices(id) ON DELETE SET NULL,
+  temp_device_id  INTEGER REFERENCES devices(id) ON DELETE SET NULL,
+  mode            TEXT    NOT NULL DEFAULT 'auto',  -- auto, forced_on, forced_off
+  created_at      DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pool_programs (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  pool_id      INTEGER NOT NULL REFERENCES pools(id) ON DELETE CASCADE,
+  name         TEXT    NOT NULL,          -- ex: Hivernage, Intermédiaire, Été
+  temp_min     REAL,                      -- NULL = pas de minimum
+  temp_max     REAL,                      -- NULL = pas de maximum
+  sort_order   INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS pool_slots (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  program_id  INTEGER NOT NULL REFERENCES pool_programs(id) ON DELETE CASCADE,
+  time_start  TEXT    NOT NULL,           -- ex: "08:00"
+  time_end    TEXT    NOT NULL            -- ex: "10:00"
+);

@@ -120,6 +120,13 @@ devicesRouter.delete('/:id', (req: Request, res: Response) => {
 
   db.prepare('DELETE FROM devices WHERE id = ?').run(req.params.id)
   res.json({ success: true })
+  const { exec } = require('child_process')
+  setTimeout(() => {
+    exec('sudo systemctl restart homebridge', (err: any) => {
+      if (err) console.error('[Delete] Erreur redémarrage Homebridge:', err.message)
+      else console.log('[Delete] Homebridge redémarré après suppression device')
+    })
+  }, 3000)
 })
 
 // POST /api/v1/devices/:id/control — envoyer une commande
