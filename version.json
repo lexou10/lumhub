@@ -1,5 +1,5 @@
 {
-  "version": "1.4.4",
-  "releaseDate": "2026-04-24",
-  "changelog": "Ajout module piscine : gestion pompe, température, programmes de filtration par palier de température avec créneaux horaires"
+  "version": "1.4.5",
+  "releaseDate": "2026-05-01",
+  "changelog": "Fix permissions renommage appareils et pièces, stabilité générale"
 }
