@@ -55,14 +55,36 @@ homekitRouter.post('/regenerate', ownerOnly, (req: Request, res: Response) => {
   }
 })
 
-// POST /api/v1/homekit/reset — réinitialise le cache Homebridge
+// POST /api/v1/homekit/reset — réinitialise le cache Homebridge + recrée le token
 homekitRouter.post('/reset', async (req, res) => {
   try {
     const { exec } = require('child_process')
+    const { getDb } = require('../../database')
+    const crypto = require('crypto')
+    const db = getDb()
+
+    // Recréer le token Homebridge
+    const newToken = 'hb_' + crypto.randomBytes(32).toString('hex')
+    db.prepare("DELETE FROM api_tokens WHERE name = 'homebridge'").run()
+    db.prepare("INSERT INTO api_tokens (name, token) VALUES ('homebridge', ?)").run(newToken)
+
+    // Mettre à jour le token dans config.json Homebridge
+    const configPath = '/home/pi/.homebridge/config.json'
+    const config = JSON.parse(require('fs').readFileSync(configPath, 'utf8'))
+    if (config.platforms) {
+      config.platforms = config.platforms.map((p: any) => {
+        if (p.platform === 'LumHub') { p.token = newToken }
+        return p
+      })
+    }
+    require('fs').writeFileSync(configPath, JSON.stringify(config, null, 4))
+
+    // Reset cache et redémarrage
     exec('sudo systemctl stop homebridge && rm -f /home/pi/.homebridge/accessories/cachedAccessories /home/pi/.homebridge/persist/*.json && sudo systemctl start homebridge', (err: any) => {
       if (err) console.error('[HomeKit Reset]', err.message)
     })
-    res.json({ success: true, message: 'Réinitialisation en cours...' })
+
+    res.json({ success: true, message: 'Réinitialisation en cours, token Homebridge recréé...' })
   } catch(e: any) {
     res.status(500).json({ error: e.message })
   }

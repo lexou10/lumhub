@@ -1,5 +1,5 @@
 {
-  "version": "1.4.5",
-  "releaseDate": "2026-05-01",
-  "changelog": "Fix permissions renommage appareils et pièces, stabilité générale"
+  "version": "1.4.6",
+  "releaseDate": "2026-05-03",
+  "changelog": "Fix reset HomeKit : recrée automatiquement le token Homebridge lors de la réinitialisation"
 }
