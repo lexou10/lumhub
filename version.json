@@ -1,5 +1,5 @@
 {
-  "version": "1.4.6",
-  "releaseDate": "2026-05-03",
-  "changelog": "Fix reset HomeKit : recrée automatiquement le token Homebridge lors de la réinitialisation"
+  "version": "1.4.7",
+  "releaseDate": "2026-05-14",
+  "changelog": "Fix scan WiFi tous réseaux disponibles, réinitialisation usine complète, support contact_sensor, endpoint lever/coucher soleil"
 }

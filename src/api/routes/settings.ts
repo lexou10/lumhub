@@ -97,3 +97,34 @@ settingsRouter.get('/sun', (req: Request, res: Response) => {
     longitude: lon
   })
 })
+
+// POST /api/v1/settings/reset — réinitialisation complète usine
+settingsRouter.post('/reset', (req: Request, res: Response) => {
+  try {
+    const db = getDb()
+
+    // Vider toutes les données
+    db.prepare('DELETE FROM device_states').run()
+    db.prepare('DELETE FROM devices').run()
+    db.prepare('DELETE FROM automations').run()
+    db.prepare('DELETE FROM rooms').run()
+    db.prepare("DELETE FROM pools").run()
+    db.prepare("DELETE FROM pool_slots").run()
+    db.prepare("DELETE FROM pool_programs").run()
+    db.prepare('DELETE FROM api_tokens').run()
+
+    db.prepare('DELETE FROM users').run()
+    db.prepare("UPDATE settings SET value = 'false' WHERE key = 'onboarding_done'").run()
+
+    // Remettre le WiFi sur l'AP de la box
+    const { exec } = require('child_process')
+    exec('sudo nmcli connection up HomeLumBOX-AP 2>/dev/null', () => {})
+
+    // Redémarrer Zigbee2MQTT
+    exec('sudo systemctl restart zigbee2mqtt', () => {})
+
+    res.json({ success: true, message: 'Réinitialisation effectuée' })
+  } catch (e: any) {
+    res.status(500).json({ error: e.message })
+  }
+})

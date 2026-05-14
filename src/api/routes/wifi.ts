@@ -9,19 +9,19 @@ export const wifiRouter = Router()
 wifiRouter.get('/', async (req: Request, res: Response) => {
   try {
     const { stdout: current } = await execAsync("nmcli -t -f NAME,DEVICE connection show --active | grep wlan0 | cut -d: -f1")
-await execAsync("nmcli device wifi rescan").catch(() => {})
-await new Promise(r => setTimeout(r, 2000))
-const { stdout: list } = await execAsync("nmcli -t -f SSID,SIGNAL,SECURITY device wifi list | grep -v '^--'")
+await execAsync("sudo nmcli device wifi rescan ifname wlan0").catch(() => {})
+await new Promise(r => setTimeout(r, 4000))
+const { stdout: list } = await execAsync("nmcli -t -f SSID,SIGNAL,SECURITY device wifi list ifname wlan0 | grep -v '^--'")
     
     const networks = list.trim().split('\n')
       .filter(l => l.trim())
       .map(line => {
+        // Les derniers champs sont signal et security, le reste est le SSID
         const parts = line.split(':')
-        return {
-          ssid: parts[0] || '',
-          signal: parseInt(parts[1]) || 0,
-          security: parts[2] || ''
-        }
+        const security = parts[parts.length - 1] || ''
+        const signal = parseInt(parts[parts.length - 2]) || 0
+        const ssid = parts.slice(0, parts.length - 2).join(':')
+        return { ssid, signal, security }
       })
       .filter(n => n.ssid)
       .sort((a, b) => b.signal - a.signal)
