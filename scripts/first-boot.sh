@@ -77,3 +77,6 @@ echo "[LumHub] WiFi réinitialisé"
 
 echo "[LumHub] ✅ Initialisation terminée — $NEW_HOSTNAME"
 touch "$FIRST_BOOT_FLAG"
+# Permissions nmcli pour wifi scan
+echo "lumhub ALL=(ALL) NOPASSWD: /usr/bin/nmcli" > /etc/sudoers.d/lumhub-nmcli
+chmod 440 /etc/sudoers.d/lumhub-nmcli
