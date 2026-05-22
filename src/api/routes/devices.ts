@@ -206,7 +206,7 @@ function sendLed(state: string) { try { const s = net.createConnection('/run/lum
 
 // POST /api/v1/devices/pairing/start — activer le pairing (owner uniquement)
 devicesRouter.post('/pairing/start', (req: Request, res: Response) => {
-  if (req.user?.role !== 'owner') { res.status(403).json({ error: 'Owner requis' }); return }
+  if (req.user?.role === 'guest') { res.status(403).json({ error: 'Accès refusé' }); return }
   const { duration = 120 } = req.body
   sendLed('pairing')
   Promise.resolve().then(() => startPairing(duration))
@@ -215,7 +215,7 @@ devicesRouter.post('/pairing/start', (req: Request, res: Response) => {
 
 // POST /api/v1/devices/pairing/stop
 devicesRouter.post('/pairing/stop', (req: Request, res: Response) => {
-  if (req.user?.role !== 'owner') { res.status(403).json({ error: 'Owner requis' }); return }
+  if (req.user?.role === 'guest') { res.status(403).json({ error: 'Accès refusé' }); return }
   sendLed('ok')
   Promise.resolve().then(() => stopPairing())
   res.json({ success: true })
