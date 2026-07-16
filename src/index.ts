@@ -15,6 +15,7 @@ const { startZigbeeService, stopZigbeeService } = require('../dist/services/zigb
 const { startThermostatService, stopThermostatService } = require('../dist/services/thermostat')
 const { startAutomationService, stopAutomationService } = require('./services/automations')
 const { startPoolService, stopPoolService } = require('./services/pool')
+const { startFeederService, stopFeederService } = require('./services/feeder')
 
 const PORT = parseInt(process.env.PORT || '3000', 10)
 const CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000  // 6 heures
@@ -41,6 +42,7 @@ async function start() {
   startThermostatService()
   startAutomationService()
   startPoolService()
+  startFeederService()
 
   const app = express()
   app.use(helmet({
@@ -68,6 +70,7 @@ app.get('/dashboard', (req, res) => {
   const shutdown = () => {
     console.log('\n[Server] Arrêt en cours...')
     stopThermostatService()
+    stopFeederService()
     stopZigbeeService()
     httpServer.close(() => { closeDb(); process.exit(0) })
   }

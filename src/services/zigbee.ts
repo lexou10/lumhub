@@ -150,6 +150,7 @@ function resolveTypeFromZ2M(device: any): string {
   if (exposes.some((e: any) => e.type === 'cover'))               return 'cover'
   if (exposes.some((e: any) => e.type === 'cover'))               return 'cover'
   if (exposes.some((e: any) => e.property === 'pilot_wire_mode')) return 'heating'
+  if (exposes.some((e: any) => e.property === 'contact'))       return 'contact_sensor'
   if (exposes.some((e: any) => e.property === 'occupancy'))       return 'motion_sensor'
   if (exposes.some((e: any) => e.property === 'temperature'))     return 'temperature_sensor'
   if (exposes.some((e: any) => e.property === 'humidity'))        return 'humidity_sensor'

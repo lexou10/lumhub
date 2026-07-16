@@ -14,6 +14,7 @@ import { thermostatsRouter }     from './routes/thermostats'
 import { poolRouter }            from './routes/pool'
 import { homekitRouter }     from './routes/homekit'
 import { wifiRouter }        from './routes/wifi'
+import { feederRouter }         from './routes/feeder'
 
 export const router = Router()
 
@@ -31,6 +32,8 @@ router.use('/profiles',    profilesRouter)
 router.use('/thermostats', thermostatsRouter)
 router.use('/homekit',     homekitRouter)
 router.use('/pool',       authMiddleware, poolRouter)
+router.use('/feeder',     authMiddleware, feederRouter)
+
 
 // Owner uniquement
 router.use('/settings', ownerOnly, settingsRouter)
