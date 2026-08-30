@@ -86,6 +86,7 @@ if (data.state !== undefined) {
 }
   if (data.brightness !== undefined)      s['brightness']  = String(Math.round(data.brightness / 254 * 100))
   if (data.temperature !== undefined)     s['temperature'] = String(Math.round(data.temperature * 100))
+  if (data.soil_moisture !== undefined)   s['soil_moisture'] = String(Math.round(data.soil_moisture * 100))  
   if (data.humidity !== undefined)        s['humidity']    = String(Math.round(data.humidity * 100))
   if (data.occupancy !== undefined)       s['occupancy']   = String(data.occupancy)
   if (data.contact !== undefined)         s['contact']     = String(data.contact)
@@ -154,6 +155,7 @@ function resolveTypeFromZ2M(device: any): string {
   if (exposes.some((e: any) => e.property === 'occupancy'))       return 'motion_sensor'
   if (exposes.some((e: any) => e.property === 'temperature'))     return 'temperature_sensor'
   if (exposes.some((e: any) => e.property === 'humidity'))        return 'humidity_sensor'
+  if (exposes.some((e: any) => e.property === 'soil_moisture'))   return 'soil_sensor'
   if (exposes.some((e: any) => e.property === 'color_temp'))      return 'color_light'
   if (exposes.some((e: any) => e.property === 'brightness'))      return 'dimmable_light'
   return 'light'

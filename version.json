@@ -1,5 +1,5 @@
 {
   "version": "1.5.0",
-  "releaseDate": "2026-07-16",
-  "changelog": "Gamelle automatique (planning, historique, doses configurables), surveillance WiFi automatique avec reconnexion, correction token dashboard tablette, timeout capteur IKEA E1525 configurable"
+  "releaseDate": "2026-08-30",
+  "changelog": "Ajout de la configuration WiFi via Bluetooth (mode config si pas de réseau, appui bouton 10-20s), scan des réseaux disponibles en BLE, correction du wifi-monitor qui coupait par erreur les connexions en mode point d'accès, correction luminosité LED ring, nouvel état LED pour le mode config BLE"
 }

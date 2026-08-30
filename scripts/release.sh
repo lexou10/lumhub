@@ -23,6 +23,7 @@ cp -r dist $TMP/
 
 # Copier scripts système
 cp /usr/local/bin/lumhub-wifi-monitor.sh $TMP/scripts/
+cp /usr/local/bin/lumhub-update-launcher.sh $TMP/scripts/ 2>/dev/null || true
 cp /usr/local/bin/lumhub-leds.py $TMP/scripts/ 2>/dev/null || true
 cp /usr/local/bin/lumhub-button.py $TMP/scripts/ 2>/dev/null || true
 
