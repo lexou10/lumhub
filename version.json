@@ -1,5 +1,5 @@
 {
-  "version": "2.1.4",
+  "version": "2.1.5",
   "releaseDate": "2026-09-18",
-  "changelog": "Correction d'une collision entre exécutions concurrentes de la mise à jour (verrou + dossier temporaire unique par exécution)"
+  "changelog": "Correction critique du launcher de mise à jour : le processus était tué prématurément par la fermeture immédiate de sa session sudo, causant systématiquement des archives corrompues quand la mise à jour était déclenchée depuis l'app"
 }
