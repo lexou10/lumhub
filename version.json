@@ -1,5 +1,5 @@
 {
-  "version": "2.1.1",
+  "version": "2.1.2",
   "releaseDate": "2026-09-18",
-  "changelog": "Ajout de la personnalisation du ring LED (couleur et on/off) accessible depuis les réglages, applicable uniquement à l'état de fonctionnement normal de la box"
+  "changelog": "L'updater se met désormais lui-même à jour à chaque déploiement, plus de dépendance à un token GitHub (le repo est public), simplification du téléchargement des mises à jour"
 }
