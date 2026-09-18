@@ -14,7 +14,7 @@ settingsRouter.get('/', (_req: Request, res: Response) => {
 // PATCH /api/v1/settings
 settingsRouter.patch('/', (req: Request, res: Response) => {
   const db = getDb()
-  const allowed = ['box_name', 'timezone', 'language', 'zigbee_channel']
+  const allowed = ['box_name', 'timezone', 'language', 'zigbee_channel', 'led_color', 'led_enabled']
 
   const update = db.prepare(`
     UPDATE settings SET value = ?, updated_at = CURRENT_TIMESTAMP WHERE key = ?

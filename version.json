@@ -1,5 +1,5 @@
 {
-  "version": "2.1.0",
-  "releaseDate": "2026-09-12",
-  "changelog": "Configuration WiFi via Bluetooth (mode config si pas de réseau, appui bouton), scan des réseaux disponibles en BLE, correction firmware Bluetooth (advertising fiable), capture des actions bouton Zigbee (télécommandes/interrupteurs) pour automatisations, correction LED (luminosité, état BLE, forçage vert), bouton physique revu, module arrosage/irrigation (pompe, température, programmes de filtration par palier avec créneaux horaires)"
+  "version": "2.1.1",
+  "releaseDate": "2026-09-18",
+  "changelog": "Ajout de la personnalisation du ring LED (couleur et on/off) accessible depuis les réglages, applicable uniquement à l'état de fonctionnement normal de la box"
 }

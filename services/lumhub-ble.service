@@ -1,0 +1,15 @@
+[Unit]
+Description=LumHub BLE WiFi Setup Mode
+After=bluetooth.service
+Wants=bluetooth.service
+ConditionPathExists=/var/lib/lumhub/ble-mode-active
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -u /usr/local/bin/lumhub-ble-server.py
+Restart=on-failure
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target

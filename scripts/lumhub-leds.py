@@ -3,7 +3,7 @@
 LumHub LED Ring Service - 12 LEDs NeoPixel sur GPIO 21 (PCM)
 Écoute un socket Unix /run/lumhub-leds.sock
 """
-import socket, os, time, threading, signal, sys
+import socket, os, time, threading, signal, sys, sqlite3
 from rpi_ws281x import PixelStrip, Color
 
 LED_COUNT      = 12
@@ -14,6 +14,7 @@ LED_BRIGHTNESS = 100
 LED_INVERT     = False
 LED_CHANNEL    = 0
 SOCK_PATH      = '/run/lumhub-leds.sock'
+DB_PATH        = '/var/lib/lumhub/lumhub.db'
 
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
 strip.begin()
@@ -31,6 +32,29 @@ def all_color(r, g, b):
         strip.setPixelColor(i, Color(r, g, b))
     strip.show()
 
+def get_ok_display():
+    """
+    Couleur/activation de l'état "ok" (box fonctionnelle), personnalisable
+    par le client depuis l'app. Les autres états (erreur, pairing, mode BLE...)
+    restent fixes, non personnalisables, pour rester lisibles/fiables.
+    Repli sur le vert historique si jamais rien n'est configuré ou en cas
+    d'erreur de lecture.
+    """
+    try:
+        conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True, timeout=2)
+        rows = dict(conn.execute(
+            "SELECT key, value FROM settings WHERE key IN ('led_color', 'led_enabled')"
+        ).fetchall())
+        conn.close()
+        enabled = rows.get('led_enabled', 'true') != 'false'
+        hex_color = (rows.get('led_color') or '#005000').lstrip('#')
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        return enabled, (r, g, b)
+    except Exception:
+        return True, (0, 80, 0)
+
 def run_animation():
     global current_state, running
     pos = 0
@@ -42,7 +66,11 @@ def run_animation():
             all_off()
             time.sleep(0.1)
         elif state == 'ok':
-            all_color(0, 80, 0)
+            enabled, (r, g, b) = get_ok_display()
+            if enabled:
+                all_color(r, g, b)
+            else:
+                all_off()
             time.sleep(0.5)
         elif state == 'boot':
             all_off()
