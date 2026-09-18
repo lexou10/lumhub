@@ -15,6 +15,7 @@ const { startZigbeeService, stopZigbeeService } = require('../dist/services/zigb
 const { startThermostatService, stopThermostatService } = require('../dist/services/thermostat')
 const { startAutomationService, stopAutomationService } = require('./services/automations')
 const { startPoolService, stopPoolService } = require('./services/pool')
+const { startIrrigationService, stopIrrigationService } = require('./services/irrigation')
 const { startFeederService, stopFeederService } = require('./services/feeder')
 
 const PORT = parseInt(process.env.PORT || '3000', 10)
@@ -42,6 +43,7 @@ async function start() {
   startThermostatService()
   startAutomationService()
   startPoolService()
+  startIrrigationService()
   startFeederService()
 
   const app = express()
@@ -70,6 +72,7 @@ app.get('/dashboard', (req, res) => {
   const shutdown = () => {
     console.log('\n[Server] Arrêt en cours...')
     stopThermostatService()
+    stopIrrigationService()
     stopFeederService()
     stopZigbeeService()
     httpServer.close(() => { closeDb(); process.exit(0) })

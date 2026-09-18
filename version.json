@@ -1,5 +1,5 @@
 {
-  "version": "1.5.0",
-  "releaseDate": "2026-07-16",
-  "changelog": "Gamelle automatique (planning, historique, doses configurables), surveillance WiFi automatique avec reconnexion, correction token dashboard tablette, timeout capteur IKEA E1525 configurable"
+  "version": "1.6.1",
+  "releaseDate": "2026-08-03",
+  "changelog": "Correction déploiement update-launcher, module arrosage, portail, sondes humidité"
 }

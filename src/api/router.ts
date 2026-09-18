@@ -14,6 +14,8 @@ import { thermostatsRouter }     from './routes/thermostats'
 import { poolRouter }            from './routes/pool'
 import { homekitRouter }     from './routes/homekit'
 import { wifiRouter }        from './routes/wifi'
+import { irrigationRouter }     from './routes/irrigation'
+import { gateRouter }          from './routes/gate'
 import { feederRouter }         from './routes/feeder'
 
 export const router = Router()
@@ -32,6 +34,8 @@ router.use('/profiles',    profilesRouter)
 router.use('/thermostats', thermostatsRouter)
 router.use('/homekit',     homekitRouter)
 router.use('/pool',       authMiddleware, poolRouter)
+router.use('/irrigation', authMiddleware, irrigationRouter)
+router.use('/gate',     authMiddleware, gateRouter)
 router.use('/feeder',     authMiddleware, feederRouter)
 
 
