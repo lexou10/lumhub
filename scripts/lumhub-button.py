@@ -1,154 +1,150 @@
 #!/usr/bin/env python3
 """
 LumHub - Bouton physique GPIO 22
-Branchement : bouton entre GPIO 22 (pin 15) et GND
-Pull-up interne → HIGH au repos, LOW quand appuyé
 
-Actions :
-  Appui court  (< 3s)              → reboot
-  Appui long   (≥ 10s)             → shutdown
-  Double appui (intervalle < 0.5s) → mode debug (orange pulsant doux 60s)
+Toutes les actions sont décidées AU RELÂCHEMENT du bouton, selon la
+durée totale de l'appui — rien ne se déclenche pendant que le bouton
+est encore tenu, pour ne jamais couper court à un appui plus long.
+
+  < 1s              → ok / debug (double appui)
+  1s à 10s          → si pas de WiFi : mode config BLE
+                       si WiFi connecté : clignote vert x2 (déjà connectée)
+  10s à 15s         → reboot
+  ≥ 15s             → shutdown
 """
-
 import time
 import subprocess
 import socket
+import signal
+import sys
 import threading
-import logging
-import RPi.GPIO as GPIO
+import gpiod
+from gpiod.line import Direction, Bias, Value
 
-# ─── Config ────────────────────────────────────────────────────
-BUTTON_PIN      = 22
-REBOOT_MAX_S    = 3.0    # appui < 3s → reboot
-SHUTDOWN_MIN_S  = 10.0   # appui ≥ 10s → shutdown
-DOUBLE_TAP_S    = 0.5    # intervalle max entre deux appuis
-DEBOUNCE_MS     = 50
-DEBUG_DURATION  = 60     # secondes en mode debug
-LED_SOCK        = "/run/lumhub-leds.sock"
+BUTTON_PIN = 22
+SOCK_PATH  = '/run/lumhub-leds.sock'
 
-# ─── Logging ───────────────────────────────────────────────────
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [button] %(levelname)s %(message)s",
-    handlers=[
-        logging.FileHandler("/var/log/lumhub-button.log"),
-        logging.StreamHandler()
-    ]
-)
-log = logging.getLogger(__name__)
+BLE_MIN_S      = 1.0
+REBOOT_MIN_S   = 10.0
+SHUTDOWN_MIN_S = 15.0
 
-# ─── LED helper ────────────────────────────────────────────────
-def set_led(state: str):
+BLE_FLAG   = "/var/lib/lumhub/ble-mode-active"
+CONFIG_TXT = "/boot/firmware/config.txt"
+WLAN_IFACE = "wlan0"
+
+def send_led(state):
     try:
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            s.connect(LED_SOCK)
-            s.sendall(state.encode())
-    except Exception as e:
-        log.warning(f"LED socket error: {e}")
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.connect(SOCK_PATH)
+        s.send(state.encode())
+        s.close()
+    except Exception:
+        pass
 
-# ─── Actions ───────────────────────────────────────────────────
+def blink_ok_twice():
+    for _ in range(2):
+        send_led('off')
+        time.sleep(0.15)
+        send_led('ok')
+        time.sleep(0.15)
+    send_led('ok')
+
+def wifi_really_connected():
+    """
+    True si wlan0 est actuellement connecté à un vrai réseau WiFi.
+    """
+    try:
+        out = subprocess.check_output(
+            ["nmcli", "-t", "-f", "DEVICE,STATE,CONNECTION", "device", "status"],
+            text=True,
+            timeout=5,
+        )
+        for line in out.strip().splitlines():
+            parts = line.split(":")
+            if len(parts) < 3:
+                continue
+            device, state, connection = parts[0], parts[1], parts[2]
+            if device == WLAN_IFACE and state == "connected" and connection != "--":
+                return True
+        return False
+    except Exception:
+        return False
+
+def do_ble_setup():
+    send_led('ble_setup')
+    try:
+        # Active le Bluetooth interne (commente la ligne dtoverlay=disable-bt),
+        # nécessaire au démarrage suivant pour que le contrôleur BT soit exposé.
+        subprocess.run(
+            ["sed", "-i", "s/^dtoverlay=disable-bt/#dtoverlay=disable-bt/", CONFIG_TXT],
+            check=True,
+        )
+        with open(BLE_FLAG, "w") as f:
+            f.write(str(time.time()))
+    except Exception:
+        send_led('error')
+        return
+    time.sleep(1)
+    subprocess.call(['sudo', 'reboot'])
+
 def do_reboot():
-    log.info("ACTION: reboot")
-    set_led("warning")       # orange pulsant rapide pendant 2s
-    time.sleep(2)
-    subprocess.run(["reboot"])
+    send_led('warning')
+    time.sleep(1)
+    subprocess.call(['sudo', 'reboot'])
 
 def do_shutdown():
-    log.info("ACTION: shutdown")
-    set_led("error")         # rouge clignotant pendant 3s
-    time.sleep(3)
-    subprocess.run(["shutdown", "-h", "now"])
+    send_led('error')
+    time.sleep(1)
+    subprocess.call(['sudo', 'poweroff'])
 
-def do_debug():
-    log.info(f"ACTION: mode debug ({DEBUG_DURATION}s)")
-    set_led("debug")         # orange pulsant lent et doux
-    def reset():
-        time.sleep(DEBUG_DURATION)
-        log.info("Mode debug terminé → retour ok")
-        set_led("ok")
-    threading.Thread(target=reset, daemon=True).start()
+# ─── GPIO (libgpiod v2.x) ───────────────────────────────────────
+request = gpiod.request_lines(
+    "/dev/gpiochip0",
+    consumer="lumhub-button",
+    config={BUTTON_PIN: gpiod.LineSettings(direction=Direction.INPUT, bias=Bias.PULL_UP)},
+)
 
-# ─── Détection appuis ──────────────────────────────────────────
-def run():
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    log.info(f"Bouton initialisé sur GPIO {BUTTON_PIN} (pull-up)")
+def is_pressed():
+    return request.get_value(BUTTON_PIN) == Value.INACTIVE
 
-    last_release_time = 0.0
-    pending_single    = False
-    pending_thread    = None
+running = True
+last_press_time = 0
 
-    while True:
-        # Attente appui (front descendant)
-        if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
-            time.sleep(0.01)
-            continue
+def shutdown_signal(sig, frame):
+    global running
+    running = False
+    request.release()
+    sys.exit(0)
 
-        # Debounce
-        time.sleep(DEBOUNCE_MS / 1000)
-        if GPIO.input(BUTTON_PIN) == GPIO.HIGH:
-            continue
+signal.signal(signal.SIGTERM, shutdown_signal)
+signal.signal(signal.SIGINT, shutdown_signal)
 
-        press_time = time.time()
-        log.debug("Bouton pressé")
-        shutdown_triggered = False
+while running:
+    if is_pressed():
+        press_start = time.time()
 
-        # Surveiller la durée d'appui
-        while GPIO.input(BUTTON_PIN) == GPIO.LOW:
-            held = time.time() - press_time
-            # Pré-alerte à 7s : LED rouge pour signaler approche du seuil shutdown
-            if held >= 7.0 and not shutdown_triggered:
-                set_led("error")
-            # Seuil shutdown atteint
-            if held >= SHUTDOWN_MIN_S and not shutdown_triggered:
-                shutdown_triggered = True
-                log.info(f"Appui très long ({held:.1f}s) → shutdown")
-                while GPIO.input(BUTTON_PIN) == GPIO.LOW:
-                    time.sleep(0.05)
-                do_shutdown()
-                return
+        # On attend juste le relâchement, sans jamais rien déclencher
+        # pendant que le bouton est encore tenu.
+        while is_pressed():
             time.sleep(0.05)
 
-        if shutdown_triggered:
-            continue
+        duration = time.time() - press_start
 
-        release_time = time.time()
-        duration     = release_time - press_time
-        log.debug(f"Relâché après {duration:.2f}s")
-
-        # Vérifier double appui
-        interval = release_time - last_release_time
-        if pending_single and interval < DOUBLE_TAP_S:
-            log.info(f"Double appui (intervalle {interval:.2f}s) → debug")
-            pending_single = False
-            pending_thread = None
-            do_debug()
+        if duration >= SHUTDOWN_MIN_S:
+            do_shutdown()
+        elif duration >= REBOOT_MIN_S:
+            do_reboot()
+        elif duration >= BLE_MIN_S:
+            if wifi_really_connected():
+                blink_ok_twice()
+            else:
+                do_ble_setup()
         else:
-            # Premier appui — attendre pour confirmer qu'il n'y a pas de deuxième
-            pending_single    = True
-            last_release_time = release_time
-            captured_time     = release_time
+            now = time.time()
+            if now - last_press_time < 0.5:
+                send_led('debug')
+            else:
+                send_led('ok')
+            last_press_time = now
 
-            def check_single(t):
-                nonlocal pending_single
-                time.sleep(DOUBLE_TAP_S + 0.05)
-                if pending_single and last_release_time == t:
-                    pending_single = False
-                    log.info(f"Appui court confirmé ({duration:.2f}s) → reboot")
-                    do_reboot()
-
-            pending_thread = threading.Thread(
-                target=check_single, args=(captured_time,), daemon=True
-            )
-            pending_thread.start()
-
-        time.sleep(0.05)
-
-if __name__ == "__main__":
-    try:
-        run()
-    except KeyboardInterrupt:
-        log.info("Arrêt manuel")
-    finally:
-        GPIO.cleanup()
+    time.sleep(0.05)
